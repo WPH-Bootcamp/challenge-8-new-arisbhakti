@@ -1,44 +1,71 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
-function App() {
-  const [count, setCount] = useState(0);
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import Search from "./components/pages/Search";
+import Details from "./components/pages/Details";
+import Favorites from "./components/pages/Favorites";
+import Home from "./components/pages/Home";
+import Header from "./components/common/Header";
+import Footer from "./components/common/Footer";
 
+const pageVariants = {
+  initial: { opacity: 0, y: 12, filter: "blur(6px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -8, filter: "blur(6px)" },
+};
+
+const pageTransition = {
+  duration: 0.4,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
+
+function Page({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <div>
-        <a
-          href='https://vite.dev'
-          target='_blank'
-        >
-          <img
-            src={viteLogo}
-            className='logo'
-            alt='Vite logo'
-          />
-        </a>
-        <a
-          href='https://react.dev'
-          target='_blank'
-        >
-          <img
-            src={reactLogo}
-            className='logo react'
-            alt='React logo'
-          />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>Click on the Vite and React logos to learn more</p>
-    </>
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={pageTransition}
+      className="w-full"
+    >
+      {children}
+    </motion.div>
   );
 }
 
-export default App;
+export default function App() {
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1 overflow-y-hidden">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <Page>
+                  <Home />
+                </Page>
+              }
+            />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/search" element={<Search />} />
+            <Route
+              path="/details/:id"
+              element={
+                <Page>
+                  <Details />
+                </Page>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
